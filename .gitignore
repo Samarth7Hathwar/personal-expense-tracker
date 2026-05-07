@@ -1,38 +1,33 @@
-# macOS junk
+._*
+# macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 
-# Python cache
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
 
-# Virtual environment
+# Virtual environments
 venv/
 .venv/
 env/
 
-# Streamlit
+# Streamlit secrets
 .streamlit/secrets.toml
 
-# Database and local data
+# Local database/private data
 data/*.db
 data/*.sqlite
 data/*.sqlite3
 
-# Logs
-*.log
-logs/
+# Environment variables
+.env
 
 # IDE/editor
 .vscode/
 .idea/
 
-# Environment variables
-.env
-
-# Build files
-build/
-dist/
-*.egg-info/
+# Logs
+*.log
