@@ -19,6 +19,15 @@ def expense_table():
                      date TEXT NOT NULL
                      )
                     """)
+    conn.execute("""
+                 CREATE TABLE IF NOT EXISTS income(
+                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                     amount REAL NOT NULL,
+                     source TEXT NOT NULL,
+                     note TEXT,
+                     date TEXT NOT NULL
+                     )
+                     """)
     conn.commit()
     conn.close()
     print("Expenses table created successfully.")
@@ -33,9 +42,25 @@ def add_expense(amount, category, note, date):
     conn.close()
     print("Expense added successfully.")
 
+def add_income(amount, source, note, date):
+    conn = get_connection()
+    conn.execute("""
+                 INSERT INTO income (amount, source, note, date)
+                 VALUES (?, ?, ?, ?)
+                 """, (amount, source, note, date))
+    conn.commit()
+    conn.close()
+    print("Income added successfully.")
+    
 def get_expenses():
     conn = get_connection()
     cursor = conn.execute("SELECT * FROM expenses").fetchall()
+    conn.close()
+    return cursor
+
+def get_income():
+    conn = get_connection()
+    cursor = conn.execute("SELECT * FROM income").fetchall()
     conn.close()
     return cursor
 
@@ -91,6 +116,33 @@ def month_expenses():
         return 0
     return total
 
+def month_income():
+    conn = get_connection()
+    row = conn.execute("""
+                       SELECT SUM(amount)
+                       FROM income
+                       WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now')
+                       """).fetchone()
+    conn.close()
+    total = row[0]
+    if total is None:
+        return 0
+    return total
+
+def total_income():
+    conn = get_connection()
+    row = conn.execute("""
+                       SELECT SUM(amount)
+                       FROM income
+                       """).fetchone()
+    conn.close()
+    total = row[0]
+    if total is None:
+        return 0
+    return total
+
+
+
 def delete_expense(expense_id):
     conn = get_connection()
     conn.execute("""
@@ -101,6 +153,38 @@ def delete_expense(expense_id):
     # The comma matters. In Python, a one-value tuple needs a comma.
     conn.commit()
     conn.close()
+
+def delete_income(income_id):
+    conn = get_connection()
+    conn.execute("""
+                 DELETE FROM income
+                 WHERE id = ?
+                 """,(income_id,)) 
+    conn.commit()
+    conn.close()
+    
+def get_daily_spending_summary():
+    conn = get_connection()
+    cursor = conn.execute("""
+                          SELECT date, SUM(amount) AS total
+                          FROM expenses
+                          GROUP BY date
+                          ORDER BY date ASC
+                            """).fetchall()
+    conn.close()
+    return cursor
+
+def get_category_summary():
+    conn = get_connection()
+    cursor = conn.execute("""
+                          SELECT category, SUM(amount) AS total
+                          FROM expenses
+                          GROUP BY category
+                          ORDER BY total DESC
+                          """).fetchall()
+    conn.close()
+    return cursor
+
 
 if __name__ == "__main__":
     expense_table()
